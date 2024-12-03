@@ -88,54 +88,49 @@ else:
 for x in range(N):#копируем матрицу F для дальнейшего транспортирования
     for y in range(N): Ft[x][y]=F[x][y]
 print()
-print('Начальная матрица А:')
+print(f'Первоначальная матрица А:')
 for x in range(N):
-    for y in range(N): print(A[x][y], end = ' ')
+    for y in range(N): 
+        print(A[x][y], end = ' ')
     print()
-print()
-print('Начальная матрица F:')
+print(f'\nПервоначальная матрица F:') 
 for x in range(N):
-    for y in range(N): print(F[x][y], end = ' ')
-    print()          
-print()
-print('Транспортированная матрица А:')
+    for y in range(N): 
+        print(F[x][y], end = ' ')   
+    print()    
+print('\nТранспортированная матрица А:')
 for x in range(N):
     for y in range(x): 
         At[x][y], At[y][x] = At[y][x], At[x][y]
 for x in range(N):
     for y in range(N): print(At[x][y], end = ' ')
     print()
-print()
-print(f'Транспортированная матрица А, умноженная на {K}:')
+print(f'\nТранспортированная матрица А, умноженная на {K}:')
 for x in range(N):
     for y in range(N):
         At[x][y] *= K
         print(At[x][y], end = ' ')
     print()
-print()
-print('Матрица F, сложенная с матрицей А:')
+print('\nМатрица F, сложенная с матрицей А:')
 for x in range(N):    
     for y in range(N):
         F[x][y] += A[x][y]
         print(F[x][y], end = ' ')
     print()
-print()
-print('Транспортированная матрица F:')
+print('\nТранспортированная матрица F:')
 for x in range(N):
     for y in range(x): 
         Ft[x][y], Ft[y][x] = Ft[y][x], Ft[x][y]
 for x in range(N):
     for y in range(N): print(Ft[x][y], end = ' ')
     print()
-print()
-print(f'Транспортированная матрица F, умноженная на {K}:')
+print(f'\nТранспортированная матрица F, умноженная на {K}:')
 for x in range(N):
     for y in range(N):
         Ft[x][y] *= K
         print(Ft[x][y], end = ' ')
     print()
-print()
-print('Результат операции ((К*At)*(F+А)-K*Ft:')
+print('\nРезультат операции ((К*At)*(F+А)-K*Ft:')
 for x in range(N):
     for y in range(N):
         At[x][y] = At[x][y]*F[x][y]-Ft[x][y]
