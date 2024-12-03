@@ -1,0 +1,143 @@
+'''29 вариант. С клавиатуры вводится два числа K и N. Квадратная матрица А(N,N) заполняется случайным 
+образом целыми числами в интервале [-10,10]. Для тестирования использовать не случайное 
+заполнение, а целенаправленное, введенное из файла.	Формируется матрица F следующим 
+образом: Скопировать в нее матрицу А и если количество четных чисел в нечетных столбцах в 
+области 2 больше, чем произведение чисел по периметру области 3, то поменять симметрично 
+области 1 и 3 местами, иначе 1 и 2 поменять местами несимметрично. При этом матрица А не 
+меняется. После чего вычисляется выражение: ((К*A T)*(F+А)-K* F T . Выводятся по мере 
+формирования А, F и все матричные операции последовательно.'''
+from random import randint
+K = int(input('Введите число K: '))
+N = int(input('Введите число N от 3 до 100: '))
+while True:
+    if N<100 and N>2: break
+    else: N=int(input('Введите число N от 3 до 100: '))
+A,F,Ft,At = [], [], [], []
+for i in range(N): #создание пустых матриц
+    A.append([0]*N)
+    F.append([0]*N)
+    Ft.append([0]*N)
+    At.append([0]*N)
+print('Как Вы хотите заполнить матрицу?\n1 - из файла 2 - случайными числами')
+flag = 0
+choice = 0
+while True:
+    if choice != '2': choice = input()
+    if choice.isnumeric():
+        if int(choice) == 1:#заполнение из файла, тут же копируем матрицу А в F
+            f = open('1.txt','r',encoding='utf8')
+            rows = 0
+            for x in range(N):
+                s = f.readline().split()
+                if s == []:
+                    break
+                for y in range(N):
+                    A[x][y] = int(s[y])
+                    F[x][y] = A[x][y]
+                    At[x][y] = A[x][y]
+                rows += 1
+            if rows != N:
+                input('Данных из файла не хватает, чтобы заполнить матрицу.\nОна будет автоматически заполнена случайными числами.\nЧтобы продолжить, нажмите Enter')
+                choice = '2'
+            else:
+                print('Вы заполнили матрицу А из файла.')
+                break
+        elif int(choice) == 2: #заполнение случайнми числами, тут же копируем матрицу А в F
+                print('Вы заполнили матрицу случайными числами от -10 до 10.')
+                for x in range(N):
+                    for y in range(N):
+                        A[x][y] = randint(-10,10)
+                        F[x][y] = A[x][y]
+                        At[x][y] = A[x][y]
+                break
+        else: print('Введено неверное число. Ответом на вопрос должно быть число:\n 1 - из файла 2 - случайными числами')
+    else: print('Ответом на вопрос должно быть целое число:\n 1 - из файла 2 - случайными числами')
+ch=0
+if N%2==0: ch=1
+count = 0
+for x in range(N//2-ch):
+    for y in range(1,N-x-1):
+            if (y+1)%2 != 0 and F[x][y]%2 == 0: count += 1
+print(f'Количество четных чисел в нечетных столбцах во 2 области равно {count}.')
+mult = 1
+nch=0
+if N%2!=0: nch=1
+for x in range(1,N//2+nch):
+    y=N-x
+    mult*=F[x][y]
+for x in range(N//2+nch,N-1):
+    y=x-N+1
+    mult*=F[x][y]
+y=N-1
+for x in range(2,N-2): 
+    mult*=F[x][y]
+print(f'Произведение чисел по периметру области 3 равно {mult}.')
+if count > mult:
+    for x in range(1,N//2+nch):
+        for y in range(x):
+            F[x][y], F[x][N-1-y] = F[x][N-1-y], F[x][y]
+    for x in range(N//2+nch,N-1):
+        for y in range(N-x):
+            F[x][y], F[x][N-1-y] = F[x][N-1-y], F[x][y]
+    print('Матрица F была изменена симметрично.')
+else:
+    for x in range(N//2-ch):
+        for y in range(x+1,N-1-x):
+                    F[x][y], F[N-1-y][x] = F[N-1-y][x], F[x][y]
+    print('Матрица F была изменена несимметрично.')
+for x in range(N):#копируем матрицу F для дальнейшего транспортирования
+    for y in range(N): Ft[x][y]=F[x][y]
+print()
+print('Начальная матрица А:')
+for x in range(N):
+    for y in range(N): print(A[x][y], end = ' ')
+    print()
+print()
+print('Начальная матрица F:')
+for x in range(N):
+    for y in range(N): print(F[x][y], end = ' ')
+    print()          
+print()
+print('Транспортированная матрица А:')
+for x in range(N):
+    for y in range(x): 
+        At[x][y], At[y][x] = At[y][x], At[x][y]
+for x in range(N):
+    for y in range(N): print(At[x][y], end = ' ')
+    print()
+print()
+print(f'Транспортированная матрица А, умноженная на {K}:')
+for x in range(N):
+    for y in range(N):
+        At[x][y] *= K
+        print(At[x][y], end = ' ')
+    print()
+print()
+print('Матрица F, сложенная с матрицей А:')
+for x in range(N):    
+    for y in range(N):
+        F[x][y] += A[x][y]
+        print(F[x][y], end = ' ')
+    print()
+print()
+print('Транспортированная матрица F:')
+for x in range(N):
+    for y in range(x): 
+        Ft[x][y], Ft[y][x] = Ft[y][x], Ft[x][y]
+for x in range(N):
+    for y in range(N): print(Ft[x][y], end = ' ')
+    print()
+print()
+print(f'Транспортированная матрица F, умноженная на {K}:')
+for x in range(N):
+    for y in range(N):
+        Ft[x][y] *= K
+        print(Ft[x][y], end = ' ')
+    print()
+print()
+print('Результат операции ((К*At)*(F+А)-K*Ft:')
+for x in range(N):
+    for y in range(N):
+        At[x][y] = At[x][y]*F[x][y]-Ft[x][y]
+        print(At[x][y], end = ' ')
+    print()       
