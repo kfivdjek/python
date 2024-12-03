@@ -1,0 +1,86 @@
+'''29 вариант. С клавиатуры вводится два числа K и N. Квадратная матрица А(N,N), состоящая из 4-х равных 
+по размерам подматриц, B,C,D,E заполняется случайным образом целыми числами в интервале [-10,10].
+Для отладки использовать не случайное заполнение, а целенаправленное (ввод из файла и 
+генератором).На основе матрицы А формируется матрица  F. По матрице F необходимо вывести не 
+менее 3 разных графика. Программа должна использовать функции библиотек numpy  и matplotlib.
+Формируется матрица F следующим образом: скопировать в нее А и  если в С количество нулей в 
+нечетных столбцах больше, чем сумма чисел по периметру , то поменять местами С и В симметрично,
+иначе С и Е поменять местами несимметрично. При этом матрица А не меняется. После чего если 
+определитель матрицы А больше суммы диагональных элементов матрицы F,то вычисляется выражение:
+A^-1*At – K * F^-1, иначе вычисляется выражение (A+G^-1-F^-1)*K, где G-нижняя треугольная матрица, 
+полученная из А. Выводятся по мере формирования А, F и все матричные операции последовательно.'''
+import numpy as np
+import matplotlib.pyplot as plt
+K = int(input('Введите число K: '))
+N = int(input('Введите число N от 3 до 100: '))
+while True:
+    if N<100 and N>2: break
+    else: N=int(input('Введите число N от 3 до 100: '))
+choice=input('Выберите, каким способом вы хотите заполнить массив:\n1-из файла 2-случайными числами\n')
+while True:
+    if choice.isnumeric():
+        if choice == '1':
+            A = np.loadtxt('1.txt',dtype=int, skiprows=0,usecols=list(range(0, N)), max_rows=N)
+            break
+        elif choice == '2':
+            A = np.random.randint(-10,10,(N,N))
+            break
+        else: choice = input('Введите целое число:\n 1-из файла 2-случайными числами\n')
+F=np.copy(A)
+print(f'Первоначальная матрица А:\n{A}')
+print(f'Первоначальная матрица F:\n{F}')
+if N%2!=0: nch=1
+else: nch=0
+count=0
+for x in range(N//2+nch,N):
+    for y in range(N//2):
+        if (y+1)%2!=0 and F[x][y]==0: count+=1
+srows = np.sum(F, axis = 1)
+scol = np.sum(F,axis = 0)
+per= srows[0] + srows[N-1] + scol[0] + srows[N-1] - F[0][0] - F[0][N-1] - F[N-1][N-1] - F[N-1][0]
+if count>per:
+    for x in range(N//2):
+        for y in range(N//2):
+            F[x][y],F[N-1-x][y]=F[N-1-x][y],F[x][y]
+    print('Матрицы В и С были поменяны симметрично')
+else:
+    for x in range(N//2+nch, N):
+        for y in range(N//2):
+            F[x][y],F[x-N//2-nch][y+N//2+nch]=F[x-N//2-nch][y+N//2+nch],F[x][y]
+    print('Матрицы C и Е были поменяны несимметрично')
+print(f'Измененная матрица F:\n{F}')
+opred = np.linalg.det(A)
+sumdiag = np.diagonal(F).sum() + np.diagonal(np.fliplr(F)).sum()
+plt.figure(figsize=(8, 6))
+plt.plot(np.diag(F), marker='o', linestyle='-')
+plt.title('Линейный график диагональных элементов матрицы F')
+plt.xlabel('Номер строки/столбца')
+plt.ylabel('Значение элемента')
+plt.figure(figsize=(8, 6))
+F=np.linalg.inv(F)
+for i in range(len(F)):
+    plt.hist(F[i, :], bins=10, label=f'Строка {i+1}')
+plt.title('Гистограммы элементов по строкам')
+plt.legend()
+plt.figure(figsize=(8, 6))
+for i in range(len(F)):
+    plt.hist(F[:, i], bins=10, label=f'Столбец {i}')
+plt.title('Гистограммы элементов по столбцам')
+plt.legend()
+if opred > sumdiag:
+    At=np.transpose(A)
+    print(f'Транспортированная матрица А:\n{At}')
+    Aobr=np.linalg.inv(A)
+    print(f'Обратная матрица А:\n{Aobr}')
+    print(f'Обратная матрица F:\n{F}')
+    result = Aobr*At-K*F
+else:
+    G = np.tril(A)
+    print(f'Нижняя треугольная матрица G:\n{G}')
+    if np.linalg.det(G): 
+        G=np.linalg.inv(G)
+        print(f'Обратная нижняя треугольная матрица G:\n{G}')
+    print(f'Обратная матрица F:\n{F}')
+    result = (A+G-F)*K
+print(f'Результат операций:\n{result}')
+plt.show()  
