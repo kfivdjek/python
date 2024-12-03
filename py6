@@ -1,0 +1,72 @@
+'''1 часть – написать программу в соответствии со своим вариантом задания. Написать 2 варианта 
+формирования (алгоритмический и с помощью функций Питона), сравнив по времени их выполнение.
+2 часть – усложнить написанную программу, введя по своему усмотрению в условие минимум одно 
+ограничение на характеристики объектов (которое будет сокращать количество переборов) и целевую 
+функцию для нахождения оптимального решения. Вариант 29. В меню кафе 10 разных типов десертов. 
+Сформировать (вывести) все возможные варианты десертов для 3 девушек.'''
+import timeit
+def a(deserts):
+    variants=[0]*(10*10*10)
+    index=0
+    for first in deserts:
+        for second in deserts:
+            for third in deserts:
+                variants[index]=[first,second,third]
+                index+=1
+    return variants
+def func(deserts):
+    from itertools import product
+    variants = product(deserts, repeat = 3)
+    return variants
+def res_first_ch(deserts):
+    print(f'\n1 часть задания. Программа без усложнения и без целевой функции.\nАлгоритмический способ\n\nВсевозможные варианты подачи десертов для 3-х девушек:')
+    print(a(deserts))
+    print(f'\nФункциональный способ\n\nВсевозможные варианты подачи десертов для 3-х девушек:')
+    count_f=0
+    for variant in func(deserts):
+        count_f += 1
+        print(variant,end=' ')
+    print(f'\nКоличество комбинаций: {count_f}')
+    time_a = timeit.timeit('a(deserts)', globals = globals(), number =1)
+    print(f'Время выполнения программы алгоритмическим способом: {time_a}')
+    time_f = timeit.timeit('func(deserts)', globals = globals(), number =1)
+    print(f'Время выполнения программы функциональным способом: {time_f}')
+def targ(deserts):
+    from itertools import product
+    import re
+    special_deserts = []
+    weight = {}
+    max_s_weight, t_s_weight = 0, 0
+    for desert in deserts:
+        match = re.match(r'[EYUIOAeyuioaУЕЫАОЭЯИЮуеыаоэяию].*', desert)
+        if match:
+            special_deserts.append(desert)
+            weight[desert] = int(input(f'Введите граммовку блюда под названием {desert} в граммах(например: 200): '))
+    variants = product(special_deserts, repeat = 3)
+    count=0
+    print('\nВсевозможные варианты комбинаций десертов, названия которых начинаются с гласной буквы:\n')
+    for variant in variants:
+        for desert in variant:
+            t_s_weight += weight[desert]
+        max_s_weight = max(t_s_weight, max_s_weight)
+        t_s_weight = 0
+        count+=1
+        print(variant, end = ' ')
+    return count, max_s_weight
+
+print('Введите названия 10 разных десертов: ')
+deserts=[]
+for desert in range(10):
+    deserts.append(input(f'Введите название {desert+1}-го десерта: '))
+while True:
+    choice = input('Выберите, какую часть программы вы хотите выполнить: \n"1" - 1 часть\n"2" - 2 часть\nИли же вы можете завершить программу, введя с клавиатуры "3":\n')
+    try: choice = int(choice)
+    except: choice = input('Вы ввели некорректные данные. Выберите, какую часть программы вы хотите выполнить: \n1 - 1 часть\n2 - 2 часть\nИли же вы можете завершить программу, введя с клавиатуры "3":\n')
+    else:
+        if choice == 1: res_first_ch(deserts)
+        elif choice == 2:
+            print('\n2 часть задания. Программа с усложнением и с целевой функцией.\n')
+            count, max_s_weight = targ(deserts)
+            print(f'\nКомбинация с наибольшим общим весом: {max_s_weight}\nКоличество комбинаций: {count}')
+        elif choice == 3: break
+        else: print('Вы ввели некорректные данные.', end = ' ')
