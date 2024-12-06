@@ -1,0 +1,76 @@
+'''Требуется для своего варианта второй части л.р. №6 (усложненной программы) разработать 
+реализацию с использованием графического интерфейса. Допускается использовать любую графическую 
+библиотеку питона. Рекомендуется использовать внутреннюю библиотеку питона  tkinter.
+В программе должны быть реализованы минимум одно окно ввода, одно окно вывода (со скролингом), 
+одно текстовое поле, одна кнопка.'''
+import tkinter as tk
+from tkinter.messagebox import showinfo
+import timeit
+import re
+from itertools import product
+def click_button():
+    max_s_weight, t_s_weight = 0, 0
+    deserts = str(vvod.get("1.0", "end")).split()
+    if len(deserts)!=10:
+        showinfo('Ошибка','Вы ввели не 10 десертов')
+        return
+    weight ={}
+    probel_weight = str(vvod1.get("1.0", "end")).split()
+    if len(probel_weight) ==10:
+        for i in range(len(probel_weight)):
+            try: probel_weight[i] = float(probel_weight[i])
+            except:
+                showinfo(title="Ошибка", message="Данные введены не корректно, запись должна содержать  ненцужных символов") 
+                return
+            else: weight[deserts[i]] = probel_weight[i]
+    else:
+        showinfo(title="Ошибка", message="Вы ввели не 10 чисел")
+        return
+    window2 = tk.Tk()
+    window2.title('Ответ')
+    window2.geometry('500x450+500+200')
+    window2.columnconfigure(index=0, weight=450)
+    t = tk.Text(window2,  height= 20, width=300)
+    t.grid(row=0, column=0, padx=(0,10))
+    scrollbar = tk.Scrollbar(window2,orient="vertical", command=t.yview)
+    scrollbar.grid(row=0, column=0, sticky='nse')
+    t["yscrollcommand"]=scrollbar.set
+    special_deserts=[]
+    for i in range(len(deserts)):
+        match = re.match(r'[EYUIOAeyuioaУЕЫАОЭЯИЮуеыаоэяию].*', deserts[i])
+        if match: special_deserts.append(deserts[i])
+    variants = product(special_deserts, repeat = 3)
+    count=0
+    texts='\nВсевозможные варианты комбинаций десертов, названия которых начинаются с гласной буквы:\n'
+    m_variant=[]
+    for variant in variants:
+        texts+=f' {variant}'
+        t_variant = variant
+        for desert in variant: t_s_weight += weight[desert]
+        if t_s_weight> max_s_weight:
+            max_s_weight = t_s_weight
+            m_variant = list(t_variant)
+        t_s_weight = 0
+        count+=1
+    texts+=f'\nКомбинация с наибольшим общим весом: {m_variant} {max_s_weight}\nКоличество комбинаций: {count}'
+    a =timeit.timeit(lambda: list(product(special_deserts, repeat = 3)), globals = globals(), number =1)
+    texts+=f'\nВремя выполнения программы: {a}'
+    t.insert(1.0, texts)
+    window2.mainloop()
+window = tk.Tk()
+window.title('Программа нахождения наибольшего веса десертов для 3 девушек')
+window.geometry('600x580+480+150')
+window.resizable(False,False)
+text = tk.Label(text = 'Введите 10 десертов,\n которые есть в меню\n через пробел: ', padx =10, pady =10, font=('Arial',14))
+text1 = tk.Label(text = 'Введите их граммовку\n через пробел: ', padx =10, pady =10, font=('Arial',14))
+vvod = tk.Text(font=('Arial',14),width= 30, height=10)
+vvod1 = tk.Text(font=('Arial',14),width= 30, height=10)
+btn = tk.Button(text = "Рассчитать!",command = click_button, font='14')
+btn1 = tk.Button(text = "Закрыть программу",command = lambda: window.quit(), font='14')
+text.grid(row=0, column=0, pady=10)
+vvod.grid(row=0, column=1, pady=10)
+text1.grid(row=1,column=0,pady=10)
+vvod1.grid(row=1, column=1, pady=10)
+btn.grid(row=3, column=1, padx=30, pady=30)
+btn1.grid(row=3, column=0, padx=30, pady=30)
+window.mainloop()
