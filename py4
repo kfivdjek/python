@@ -29,12 +29,10 @@ s = f.readline().split()
 while s!=[]:
     for i in s:
         i=i.upper()
-        match = re.match(r"^-?[ABCDEF0123456789]+[02468ACE]$", i)
-        if match and len(i)>4:
-            if i[-5]=='B':
-                print(i)
-                for sym in i:
-                    if sym!='-' and sym!='+': d[sym]+=1
-    dole = sum(d.values())/100   
+        for sym in i:
+            if sym in d.keys(): d[sym]+=1
+        match = re.match(r"^-?[ABCDEF0123456789]*[B][ABCDEF0123456789]{3}[02468ACE]$", i)
+        if match: print(i)  
     s = f.readline().split()
-for key in d: print(f'Частота появления {key} в искомых числах равна {dole*d[key]}')
+for key in d: print(f'Частота появления {key} в файле равна {d[key]}')
+
