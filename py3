@@ -26,11 +26,10 @@ while s!=[]:
         try: int(i,16)
         except: continue
         else:
+            for sym in i:
+                if sym in d.keys(): d[sym]+=1
             if len(i)>4:
                 if i[-5]=='B' and int(i,16)%2==0: 
                     print(i)
-                    for sym in i:
-                        if sym!='-' and sym!='+': d[sym]+=1
-                    dole = sum(d.values())/100
     s = f.readline().split()
-for key in d: print(f'Частота появления {key} в искомых числах равна {dole*d[key]}')
+for key in d: print(f'Частота появления {key} в файле равна {d[key]}')
