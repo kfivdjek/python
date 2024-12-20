@@ -1,0 +1,116 @@
+'''Вариант 29. Требуется написать ООП с графическим интерфейсом в соответствии со своим 
+вариантом. Должны быть реализованы минимум один класс, три атрибута, четыре метода (функции). 
+Ввод данных из файла с контролем правильности ввода. Базы данных не использовать. При 
+необходимости сохранять информацию в файлах, разделяя значения запятыми (CSV файлы) или 
+пробелами. Для GUI и визуализации использовать библиотеку tkinter.
+Объекты – договоры на медицинское обслуживание
+Функции:    сегментация полного списка договоров по видам услуг
+            визуализация предыдущей функции в форме круговой диаграммы
+            сегментация полного списка договоров по врачам
+            визуализация предыдущей функции в форме круговой диаграммы'''
+import tkinter as tk
+import matplotlib
+matplotlib.use("TkAgg")
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import csv
+class Contract:
+    def __init__(self, medicine_type, doctor, price):
+        self.medicine_type = medicine_type
+        self.doctor = doctor
+        self.price= price
+    def get_medicine_type(self):
+        return self.medicine_type
+    def get_doctor(self):
+        return self.doctor
+    def get_price(self):
+        return self.price
+def load_data(t,file_name):
+    try:
+        with open(file_name, 'r', encoding='utf-8') as f:
+            reader = csv.reader(f, delimiter=',')
+            contracts = []
+            for row in reader:
+                medicine_type, doctor, price = row
+                try: price = int(price)
+                except ValueError: 
+                    contracts=[]
+                    t.delete(1.0,tk.END)
+                    t.insert(1.0,f"Некорректный ввод стоимости в строчке {reader.line_num}")
+                    break
+                else:
+                    t.insert(tk.END,f'{medicine_type} {doctor} {price}\n')
+                    contract = Contract(medicine_type, doctor, price)
+                    contracts.append(contract)
+        return contracts
+    except FileNotFoundError:
+        t.insert(1.0, "Файл не найден.")
+        print("Файл не найден.")
+        return []
+def segment_by_medicine_type(contracts):
+    segmentation = {}
+    for contract in contracts:
+        medicine_type = contract.get_medicine_type()
+        if medicine_type not in segmentation:
+            segmentation[medicine_type] = []
+        segmentation[medicine_type].append(contract)
+    return segmentation
+def visualize_medicine_type_pie_chart(window, segmentation):
+    canvas = tk.Canvas(window, width=550, height=550)
+    canvas.grid(row=1, column=1)
+    labels = list(segmentation.keys())
+    sizes = [len(contracts) for contracts in segmentation.values()]
+    fig = plt.Figure(figsize=(6, 6), dpi=80)
+    ax = fig.add_subplot(111)
+    ax.pie(sizes, labels=labels, autopct='%1.1f%%')
+    ax.set_title("Сегментация договоров по типам услуг")
+    canvas_agg = FigureCanvasTkAgg(fig, canvas)
+    canvas_agg.draw()
+    canvas_agg.get_tk_widget().pack()
+def segment_by_doctor(contracts):
+    segmentation = {}
+    for contract in contracts:
+        doctor = contract.get_doctor()
+        if doctor not in segmentation:
+            segmentation[doctor] = []
+        segmentation[doctor].append(contract)
+    return segmentation
+def visualize_doctor_pie_chart(window,segmentation):
+    canvas = tk.Canvas(window, width=550, height=550)
+    canvas.grid(row=1, column=0)
+    labels = list(segmentation.keys())
+    sizes = [len(contracts) for contracts in segmentation.values()]
+    fig = plt.Figure(figsize=(6, 6), dpi=80)
+    ax = fig.add_subplot(111)
+    ax.pie(sizes, labels=labels, autopct='%1.1f%%')
+    ax.set_title("Сегментация договоров по врачам")
+    canvas_agg = FigureCanvasTkAgg(fig, canvas)
+    canvas_agg.draw()
+    canvas_agg.get_tk_widget().pack()
+def main():
+    window = tk.Tk()
+    window.title("Программа отображения сегментаций списка договоров")
+    window.geometry("1000x750+200+50")
+    window.columnconfigure(index=0, weight=700)
+    window.columnconfigure(index=1, weight=700)
+    lbl1=tk.Label(font='9', text="Сегментация договоров по врачам")
+    lbl2=tk.Label(font='9', text="Сегментация договоров по типам услуг")
+    t = tk.Text(window,height=7,font='9', width = 700)
+    t.grid(row=3,column=0, columnspan=2, sticky='ew',pady=10)
+    scrollbar = tk.Scrollbar(orient="vertical", command = t.yview)
+    t["yscrollcommand"]=scrollbar.set
+    scrollbar.grid(row=3,column=0,columnspan=2,sticky='nse')
+    t.yview_scroll(number=1, what="units")
+    scrollbar.config(command=t.yview)
+    btn1 = tk.Button(font='9',text='Завершить программу', command= lambda: window.quit())
+    contracts = load_data(t,'8.csv')
+    if contracts:
+        lbl1.grid(row=0, column=0, padx=10, pady=10)
+        lbl2.grid(row=0, column=1, padx=10, pady=10)
+        segmentation = segment_by_medicine_type(contracts)
+        visualize_medicine_type_pie_chart(window,segmentation)
+        segmentation = segment_by_doctor(contracts)
+        visualize_doctor_pie_chart(window,segmentation)
+    btn1.grid(row=4, column=0, columnspan=2,pady=20)
+    window.mainloop()
+main()
