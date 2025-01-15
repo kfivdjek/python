@@ -64,13 +64,13 @@ def bot_move():   // Эта функция реализует логику, по
     for i in combinations: // это список всех возможных выигрышных комбинаций
         variants = (([condition[i[0]], condition[i[1]], condition[i[2]]]))
         if variants.count(1-choice) == 2 and variants.count(None) == 1:
-            index = i[variants.index(None)]
+            index = i[variants.index(None)] // это даёт боту зпнять клетку, которая может привезти к выйгрышу
             break
-    if index is None:
-        for i in combinations:
-            variants = (([condition[i[0]], condition[i[1]], condition[i[2]]]))
-            if variants.count(choice) == 2 and variants.count(None) == 1:
-                index = i[variants.index(None)]
+    if index is None: // пока индекс равен пустой клетке, бот ищет выйгрышный вариант.
+        for i in combinations: // Цикл перебирает все возможные выигрышные комбинации, представленные в массиве combinations.
+            variants = (([condition[i[0]], condition[i[1]], condition[i[2]]])) // - variants — это список, состоящий из текущих состояний трех клеток, которые связаны с текущей комбинацией в i.
+            if variants.count(choice) == 2 and variants.count(None) == 1: //из-за этой строки бот проверит есть ли две клетки занятые им, если да то он сделает нужный ход.
+                index = i[variants.index(None)]// это даёт боту зпнять клетку, которая может привезти к выйгрышу
                 break
     if index is None:
         for i in combinations:
@@ -78,61 +78,61 @@ def bot_move():   // Эта функция реализует логику, по
             if variants.count(1-choice) == 1 and variants.count(None) == 2:
                 index = i[variants.index(None)]
                 break
-    if index is None:
+    if index is None: // пока индекс равен пустой клетке, бот ищет выйгрышный вариант.
         if condition[4] is None:
-            index = 4
+            index = 4 //проверяется, свободна ли центральная клетка (индекс 4) игрового поля. Если да, то бот выбирает её.
+    if index is None: // если центр всё ещё равное none, то ...
+        empty_indexes = [] // записываем интексы клеток, которые свободны для хода
+        for i in range(0, 9, 2): //Этот цикл перебирает индексы от 0 до 8 с шагом 2. То есть, он будет итерироваться по следующим индексам: 0, 2, 4, 6, 8.
+            if condition[i] is None: // проверяем на пустоту клетку индекса
+                empty_indexes.append(i) // если клетка пустая, то i добавляется в список empty_indexes
+        if empty_indexes: // если список пумстой
+            index = random.choice(empty_indexes) // то выбирает любой элемент из списка.
     if index is None:
-        empty_indexes = []
-        for i in range(0, 9, 2):
-            if condition[i] is None:
-                empty_indexes.append(i)
-        if empty_indexes:
-            index = random.choice(empty_indexes)
-    if index is None:
-        empty_indexes = []
-        for index, el in enumerate(condition):
-            if el is None:
-                empty_indexes.append(index)
-        if empty_indexes:
-            index = random.choice(empty_indexes)
-    condition[index] = 1-choice
-    row = index // 3
-    col = index % 3
-    if choice==0: add_x(row, col)
-    else: add_o(row, col)
-def winner():
-    global win
-    variants = []
-    for i in combinations: variants.append([condition[i[0]], condition[i[1]], condition[i[2]]])
-    if [choice] * 3 in variants:win = 'Ты ПОБЕДИЛ!'
-    elif [1-choice] * 3 in variants:win = 'Бот Выиграл'
-    elif None not in condition:win = 'Ничья'
-    return win
-def end_game():
-    global run_game,games
-    run_game = False
+        empty_indexes = []  // записываем интексы клеток, которые свободны для хода
+        for index, el in enumerate(condition): // зпускает цикл перебора элементов списка condition, enumerate(condition)  создает пары, в которых есть номер ячейки (индекс) и значение, которое находится в этой ячейке. 
+            if el is None:  Эта строка проверяет, является ли текущий элемент el пустым, если да то ячейка на игр. поле свободна
+                empty_indexes.append(index), если да, то добавляем номер этой ячейки в список empty_indexes
+        if empty_indexes: // записываем интексы клеток, которые свободны для хода
+            index = random.choice(empty_indexes)  // то выбирает любой элемент из списка.
+    condition[index] = 1-choice // берем индекс, по которому бот сделал свой ход, и записываем в массив condition значение 1 - choice.
+    row = index // 3   // С помощью index // 3 мы находим номер строки в котоорой находится клетка
+    col = index % 3   // С помощью index % 3 мы находим номер столбца в котором находится клетка
+    if choice==0: add_x(row, col) //Если choice равно 0, это значит, что бот добавляет "X" на поле, вызывая функцию add_x, которая принимает строку и столбец, где был сделан ход.
+    else: add_o(row, col) //Если choice равно 1, то добавляется "O" с помощью функции add_o.
+def winner(): //функция которая проверяет есть ли победитель в игре
+    global win // функция исп. глобальную переменную win, хранящую инфу о результате
+    variants = [] // сознаём пустой список
+    for i in combinations: variants.append([condition[i[0]], condition[i[1]], condition[i[2]]]) // для каждой комюинации берем соответствующие элементы из списка condition и добавляем их в variants. 
+    if [choice] * 3 in variants:win = 'Ты ПОБЕДИЛ!' / если в variants комбинация из 3 одинаковых значений, то win получает значение  'Ты ПОБЕДИЛ!' 
+    elif [1-choice] * 3 in variants:win = 'Бот Выиграл' / если у бота такоя комбинация то выйграл он
+    elif None not in condition:win = 'Ничья' /если ничего не сработало и нет пустых клеток, то ничья
+    return win // функция информирует о результате игры
+def end_game(): // функция отвечающая за конец игры
+    global run_game, games //функция будет использовать глобальные переменные run_game (для контроля состояния игры) и games (для управления элементами интерфейса игры).
+    run_game = False // игра не будет продолжаться
     for row in games:
-        for button in row:button['state'] = 'disabled'
-    showinfo("Игра окончена", win)
+        for button in row:button['state'] = 'disabled' // игрок больше не может нажимать на кнопки
+    showinfo("Игра окончена", win) // сообщение о завершение игры
     for i in range(3):
-        for j in range(3):games[i][j].grid_forget()
-    button1.grid_forget()
-    games=[]
+        for j in range(3):games[i][j].grid_forget() // очистка экрана после игры.
+    button1.grid_forget() // убираем button1, для начала новой игры
+    games=[] // создание пустого списка для новой игры 
     fig()
 def choose_x():
     global choice
-    choice = 1
-    new_game()
+    choice = 1 // игрок выбирает x
+    new_game() // начало новой игры
 def choose_o():
     global choice
-    choice = 0
-    new_game()
-def fig():
-    root.columnconfigure(index=0,weight=50)
-    root.columnconfigure(index=1,weight=50)
-    root.columnconfigure(index=2,weight=0)
-    Label(root, text="Выберите фигуру:",font='9').grid(row=0, column=0, columnspan=2)
-    Button(root, text="X", font='9', command=choose_x).grid(row = 1, column = 0, sticky='ew',)
-    Button(root, text="O", font='9', command=choose_o).grid(row = 1, column = 1, sticky='ew')
-fig()
-root.mainloop()
+    choice = 0 // то же самое но для 0
+    new_game() // начало новой игры
+def fig(): // создание интерфейса для выбора фигуры
+    root.columnconfigure(index=0,weight=50) //Устанавливая weight, мы задаем, как будут распределяться свободные места между столбцами. 
+    root.columnconfigure(index=1,weight=50) 
+    root.columnconfigure(index=2,weight=0) //первый и второй столбцы получат больше места (вес 50), а третий столбец не будет получать дополнительного пространства (вес 0).
+    Label(root, text="Выберите фигуру:",font='9').grid(row=0, column=0, columnspan=2)// создаётся надпись о выьоре фигуры в два столбца  
+    Button(root, text="X", font='9', command=choose_x).grid(row = 1, column = 0, sticky='ew',) // создание кнопки x
+    Button(root, text="O", font='9', command=choose_o).grid(row = 1, column = 1, sticky='ew') // создание кнопки 0
+fig() // для отображения символа на экране
+root.mainloop() // Эта команда запускает основной цикл обработки событий tkinter, который поддерживает окно активным и ожидает взаимодействия пользователя 
