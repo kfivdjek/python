@@ -1,67 +1,67 @@
-from tkinter import *
-import random
-from tkinter.messagebox import *
+from tkinter import *   // библиотека для работы с графичесиким интерфейсом
+import random   // библиотека для выбора случайных элементов
+from tkinter.messagebox import *  // модуль в tkinter, который предоставляет функции для отображения диалоговых окон с сообщениями, предупреждениями, вопросами
 root = Tk()
 root.title('Крестики Нолики')
-root.geometry('300x295+620+180')
-games=[]
-choice = 0
-combinations = [(0, 1, 2), (3, 4, 5), (6, 7, 8), (0, 3, 6), (1, 4, 7), (2, 5, 8), (0, 4, 8), (2, 4, 6)]
-def new_game():
-    global run_game, win, condition, games, button1
-    if games!=[]:
+root.geometry('300x295+620+180')  // создание главного окна, заголовка и размеров
+games=[] // список хранения кнопок игрового поля
+choice = 0 // отпределяет кто начнёт
+combinations = [(0, 1, 2), (3, 4, 5), (6, 7, 8), (0, 3, 6), (1, 4, 7), (2, 5, 8), (0, 4, 8), (2, 4, 6)] // выйгрышние комбинации
+def new_game():  // инициализация новой игры
+    global run_game, win, condition, games, button1 //   используем их для контроля состояния игры и кнопок. 
+    if games!=[]:  
         for i in range(3):
-            for j in range(3): games[i][j].grid_forget()
+            for j in range(3): games[i][j].grid_forget() // Проверяем, есть ли уже существующая игра. Если список games не пуст, это значит, что игра уже была начата.
         button1.grid_forget()
         games=[]
-        return fig()
-    run_game = True
-    condition = [None] * 9
-    win = None
-    games = []
-    root.columnconfigure(index=2,weight=50)
-    for i in range(3):
+        return fig() //Здесь мы также убираем кнопку "Новая игра" и очищаем список games. Функция fig() вероятно возвращает интерфейс к начальному состоянию или настраивает его.
+    run_game = True // означает что игра продолжается
+    condition = [None] * 9 // означает проедставляет список из 9 клеток и показывает что игроки не сделали ход
+    win = None // означает что на данный момент нету победителя
+    games = [] // список игр очищен
+    root.columnconfigure(index=2,weight=50) // используется для управления распределением пространства в интерфейсе. Она указывает, что столбец с индексом 2 (где бот будет выполнять свои ходы) будет занимать 50% свободного пространства.
+    for i in range(3): // отвечает за строки
         row = []
-        for j in range(3):
-            button = Button(root, text="", width=10, height=5, command=lambda row=i, col=j: click(row, col))
-            button.grid(row=i, column=j,sticky='ew')
-            row.append(button)
-        games.append(row)
+        for j in range(3): //   отвечает за столбцы.  В результате создаётся игровое поле размера 3x3 в виде кнопок.
+            button = Button(root, text="", width=10, height=5, command=lambda row=i, col=j: click(row, col)) //Этот параметр устанавливает функцию, которая будет вызываться при нажатии на кнопку. Используется lambda, чтобы зафиксировать значения row и col в момент создания кнопки.
+            button.grid(row=i, column=j,sticky='ew') //- button.grid(row=i, column=j, sticky='ew'): //Метод grid() используется для размещения кнопки в сетке по координатам (i, j). Параметр sticky='ew' позволяет кнопке растягиваться по горизонтали, что улучшает внешний вид интерфейса.
+            row.append(button) // Кнопка добавляется в список row, который временно хранит кнопки текущей строки.
+        games.append(row) // После завершения внутреннего цикла, вся строка с кнопками добавляется в основной список games
     button1 = Button(root,font='9', text="Новая игра", command=new_game)
     button1.grid(row = 3, column=0,columnspan=3, sticky='nswe')
-    if choice == 0:bot_move()
-def add_x(row, col):
+    if choice == 0:bot_move() // Создается кнопка для начала новой игры:
+def add_x(row, col): 
     games[row][col]['text'] = 'X'
     games[row][col]['state'] = 'disabled'
 def add_o(row, col):
     games[row][col]['text'] = 'O'
-    games[row][col]['state'] = 'disabled'
-def click(row, col):
-    global choice
+    games[row][col]['state'] = 'disabled' //замена текста на кнопках на "X" или "O",отключение кнопки , чтобы после хода игрока на неё нельзя было нажать еще раз.
+def click(row, col): //эта функция управляет логикой, связанной с кликами на кнопки (ячейки) игрового поля.
+    global choice // глобальная переменная, определояющая что выбрал игрок x или 0
     if run_game:
-        index = row * 3 + col
-        if condition[index] is None:
-            if choice == 1:
-                condition[index] = 1
-                add_x(row, col)
-                if winner():
-                    end_game()
-                else:
-                    bot_move()
-                    if winner():
-                        end_game()
-            elif choice == 0:
-                condition[index] = 0
-                print(condition)
-                add_o(row, col)
-                if winner():end_game()
-                else:
-                    bot_move()
-                    if winner():end_game()
-    else:new_game()
-def bot_move():
-    index = None
-    for i in combinations:
+        index = row * 3 + col # Вычисление индекса клетки
+        if condition[index] is None: # Проверяем, свободна ли клетка
+            if choice == 1: # Если игрок выбрал "X"
+                condition[index] = 1 # Обновляем состояние для "X"
+                add_x(row, col)  # Добавляем "X" на кнопку
+                if winner():  # Проверяем на победу
+                    end_game()# Завершение игры, если игрок выиграл
+                else:  # Если победы нет
+                    bot_move() # Ход бота
+                    if winner():# Проверяем на победу снова
+                        end_game() # Завершение игры, если бот выиграл
+            elif choice == 0:  # Если игрок выбрал "O"
+                condition[index] = 0 # Обновляем состояние для "O"
+                print(condition) # Вывод текущего состояния на консоль
+                add_o(row, col)  # Добавляем "O" на кнопку
+                if winner():end_game()  # Проверяем на победу  # Завершение игры, если игрок выиграл
+                else:# Если победы нет
+                    bot_move() # Ход бота
+                    if winner():end_game()  # Проверяем на победу снова # Завершение игры, если бот выиграл
+    else:new_game()  # Если игра не идет # Запускаем новую игру
+def bot_move():   // Эта функция реализует логику, позволяющую боту принимать решения о том, куда сделать ход на основе текущего состояния игрового поля.
+    index = None // Если бот найдет подходящую клетку, index изменится на соответствующий индекс.
+    for i in combinations: // это список всех возможных выигрышных комбинаций
         variants = (([condition[i[0]], condition[i[1]], condition[i[2]]]))
         if variants.count(1-choice) == 2 and variants.count(None) == 1:
             index = i[variants.index(None)]
