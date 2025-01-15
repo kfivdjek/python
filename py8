@@ -8,12 +8,12 @@
             визуализация предыдущей функции в форме круговой диаграммы
             сегментация полного списка договоров по врачам
             визуализация предыдущей функции в форме круговой диаграммы'''
-import tkinter as tk
-import matplotlib
-matplotlib.use("TkAgg")
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import csv
+import tkinter as tk // для работы с графичискими интерфейсами, tk для упрощения написания
+import matplotlib // библиотека для создания графиков и визуализации данных
+matplotlib.use("TkAgg") // TkAgg визуализировать графики внутри окон приложений
+import matplotlib.pyplot as plt //импортируем подмодуль pyplot, который предоставляет функции для построения графиков
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg // использование класса FigureCanvasTkAgg для интегрирования графиков из matplotlib в графичесакие интерфейсы
+import csv // модуль позволяющий читать и записывать данные в формате CSV
 class Contract:
     def __init__(self, medicine_type, doctor, price):
         self.medicine_type = medicine_type
@@ -24,93 +24,93 @@ class Contract:
     def get_doctor(self):
         return self.doctor
     def get_price(self):
-        return self.price
-def load_data(t,file_name):
+        return self.price // метод init для создания нового объекта класса.
+def load_data(t,file_name): создании функции с двумя аргументами  t: текстовый виджет  куда будет выведена информация. file_name: имя файла, из которого нужно загрузить данные.
     try:
-        with open(file_name, 'r', encoding='utf-8') as f:
-            reader = csv.reader(f, delimiter=',')
-            contracts = []
-            for row in reader:
-                medicine_type, doctor, price = row
+        with open(file_name, 'r', encoding='utf-8') as f: // открытие файла в режиме чтения, encoding='utf-8' используется для работы с текстами в русском языке и для правильного считывания символов.
+            reader = csv.reader(f, delimiter=',') / Здесь создается объект reader, который читает содержимое файла в формате CSV 
+            contracts = [] // создаём пустой список для добавления объектов contracts 
+            for row in reader: //Мы проходим по каждой строке (ряду) в файле
+                medicine_type, doctor, price = row //Извлекаем тип лекарства, имя доктора и цену из текущей строки.
                 try: price = int(price)
-                except ValueError: 
-                    contracts=[]
-                    t.delete(1.0,tk.END)
-                    t.insert(1.0,f"Некорректный ввод стоимости в строчке {reader.line_num}")
-                    break
+                except ValueError:  Здесь мы пытаемся преобразовать цену в целое число. Если это не удается (например, если цена записана некорректно), то:
+                    contracts=[] //- Очищаем список контрактов.
+                    t.delete(1.0,tk.END) // - Очищаем текстовый виджет.
+                    t.insert(1.0,f"Некорректный ввод стоимости в строчке {reader.line_num}") //- Выводим сообщение об ошибке, указывающее, что цена в определенной строке некорректна.
+                    break //- Прерываем цикл.
                 else:
                     t.insert(tk.END,f'{medicine_type} {doctor} {price}\n')
-                    contract = Contract(medicine_type, doctor, price)
-                    contracts.append(contract)
+                    contract = Contract(medicine_type, doctor, price) //Если цена корректная, создаем объект Contract и добавляем его в список contracts.
+                    contracts.append(contract) //Также добавляем информацию о текущем контракте в текстовый виджет.
         return contracts
     except FileNotFoundError:
         t.insert(1.0, "Файл не найден.")
         print("Файл не найден.")
-        return []
+        return [] //Если файл с заданным именем не найден, функция уведомляет об этом пользователя в текстовом виджете и возвращает пустой список [].
 def segment_by_medicine_type(contracts):
-    segmentation = {}
-    for contract in contracts:
-        medicine_type = contract.get_medicine_type()
-        if medicine_type not in segmentation:
-            segmentation[medicine_type] = []
-        segmentation[medicine_type].append(contract)
-    return segmentation
+    segmentation = {}  # Создаем пустой словарь для хранения сегментов
+    for contract in contracts: # Проходим по каждому контракту в списке
+        medicine_type = contract.get_medicine_type()  # Получаем тип лекарства из контракта
+        if medicine_type not in segmentation:  # Если такого типа лекарства еще нет в сегментации
+            segmentation[medicine_type] = []  # Создаем новый список для этого типа
+        segmentation[medicine_type].append(contract) # Добавляем контракт в соответствующий список
+    return segmentation # Возвращаем словарь с сегментами
 def visualize_medicine_type_pie_chart(window, segmentation):
-    canvas = tk.Canvas(window, width=550, height=550)
-    canvas.grid(row=1, column=1)
-    labels = list(segmentation.keys())
-    sizes = [len(contracts) for contracts in segmentation.values()]
-    fig = plt.Figure(figsize=(6, 6), dpi=80)
-    ax = fig.add_subplot(111)
-    ax.pie(sizes, labels=labels, autopct='%1.1f%%')
-    ax.set_title("Сегментация договоров по типам услуг")
-    canvas_agg = FigureCanvasTkAgg(fig, canvas)
-    canvas_agg.draw()
-    canvas_agg.get_tk_widget().pack()
+    canvas = tk.Canvas(window, width=550, height=550)  # Создаем холст для рисования
+    canvas.grid(row=1, column=1)  # Размещаем холст в окне
+    labels = list(segmentation.keys()) # Получаем список типов лекарств (метки для диаграммы)
+    sizes = [len(contracts) for contracts in segmentation.values()]  # Получаем количество контрактов для каждого типа
+    fig = plt.Figure(figsize=(6, 6), dpi=80)# Создаем фигуру для графика
+    ax = fig.add_subplot(111) # Добавляем оси для диаграммы
+    ax.pie(sizes, labels=labels, autopct='%1.1f%%')  # Создаем круговую диаграмму
+    ax.set_title("Сегментация договоров по типам услуг") # Устанавливаем заголовок
+    canvas_agg = FigureCanvasTkAgg(fig, canvas)  # Создаем объект для интеграции диаграммы в Tkinter
+    canvas_agg.draw()  # Отрисовываем диаграмму
+    canvas_agg.get_tk_widget().pack() # Упаковываем диаграмму в холст
 def segment_by_doctor(contracts):
-    segmentation = {}
-    for contract in contracts:
-        doctor = contract.get_doctor()
-        if doctor not in segmentation:
-            segmentation[doctor] = []
-        segmentation[doctor].append(contract)
-    return segmentation
+    segmentation = {}  # Создаем пустой словарь для храннения контрактов сгрупированные по докторам
+    for contract in contracts:  # Проходим по каждому контракту в списке
+        doctor = contract.get_doctor()  # Получаем имя доктора из контракта
+        if doctor not in segmentation: # Если такого доктора еще нет в словаре
+            segmentation[doctor] = []  # то, Создаем новый список для этого доктора
+        segmentation[doctor].append(contract)  # Добавляем контракт в список доктора
+    return segmentation  # Возвращаем словарь с сегментами
 def visualize_doctor_pie_chart(window,segmentation):
-    canvas = tk.Canvas(window, width=550, height=550)
-    canvas.grid(row=1, column=0)
-    labels = list(segmentation.keys())
-    sizes = [len(contracts) for contracts in segmentation.values()]
-    fig = plt.Figure(figsize=(6, 6), dpi=80)
-    ax = fig.add_subplot(111)
-    ax.pie(sizes, labels=labels, autopct='%1.1f%%')
-    ax.set_title("Сегментация договоров по врачам")
-    canvas_agg = FigureCanvasTkAgg(fig, canvas)
-    canvas_agg.draw()
-    canvas_agg.get_tk_widget().pack()
-def main():
-    window = tk.Tk()
-    window.title("Программа отображения сегментаций списка договоров")
-    window.geometry("1000x750+200+50")
-    window.columnconfigure(index=0, weight=700)
-    window.columnconfigure(index=1, weight=700)
-    lbl1=tk.Label(font='9', text="Сегментация договоров по врачам")
-    lbl2=tk.Label(font='9', text="Сегментация договоров по типам услуг")
-    t = tk.Text(window,height=7,font='9', width = 700)
-    t.grid(row=3,column=0, columnspan=2, sticky='ew',pady=10)
-    scrollbar = tk.Scrollbar(orient="vertical", command = t.yview)
-    t["yscrollcommand"]=scrollbar.set
-    scrollbar.grid(row=3,column=0,columnspan=2,sticky='nse')
-    t.yview_scroll(number=1, what="units")
-    scrollbar.config(command=t.yview)
-    btn1 = tk.Button(font='9',text='Завершить программу', command= lambda: window.quit())
-    contracts = load_data(t,'8.csv')
-    if contracts:
-        lbl1.grid(row=0, column=0, padx=10, pady=10)
-        lbl2.grid(row=0, column=1, padx=10, pady=10)
-        segmentation = segment_by_medicine_type(contracts)
-        visualize_medicine_type_pie_chart(window,segmentation)
-        segmentation = segment_by_doctor(contracts)
-        visualize_doctor_pie_chart(window,segmentation)
-    btn1.grid(row=4, column=0, columnspan=2,pady=20)
-    window.mainloop()
-main()
+    canvas = tk.Canvas(window, width=550, height=550)  # Создаем холст для диаграммы
+    canvas.grid(row=1, column=0)  # Размещаем холст в окне
+    labels = list(segmentation.keys())  # Получаем список врачей (меток для диаграммы)
+    sizes = [len(contracts) for contracts in segmentation.values()] # Получаем количество контрактов для каждого врача
+    fig = plt.Figure(figsize=(6, 6), dpi=80)  # Создаем фигуру для графика
+    ax = fig.add_subplot(111)  # Добавляем оси для диаграммы
+    ax.pie(sizes, labels=labels, autopct='%1.1f%%') # Создаем круговую диаграмму
+    ax.set_title("Сегментация договоров по врачам")  # Устанавливаем заголовок диаграммы
+    canvas_agg = FigureCanvasTkAgg(fig, canvas)  # Создаем объект для интеграции диаграммы с Tkinter в графическом инфтерфейсе
+    canvas_agg.draw()  # Отрисовываем диаграмму
+    canvas_agg.get_tk_widget().pack()  # Упаковываем диаграмму в холст
+def main(): // запуск графического приложения
+    window = tk.Tk()  # Создаем главное окно приложения
+    window.title("Программа отображения сегментаций списка договоров")  # Устанавливаем заголовок окна
+    window.geometry("1000x750+200+50") # Устанавливаем размеры и положение окна
+    window.columnconfigure(index=0, weight=700)  # Настраиваем вес для столбца 0
+    window.columnconfigure(index=1, weight=700) # Настраиваем вес для столбца 1
+    lbl1=tk.Label(font='9', text="Сегментация договоров по врачам") # Создаем метку для врачей
+    lbl2=tk.Label(font='9', text="Сегментация договоров по типам услуг") # Создаем метку для типов услуг
+    t = tk.Text(window,height=7,font='9', width = 700) # Создаем текстовое поле для вывода информации
+    t.grid(row=3,column=0, columnspan=2, sticky='ew',pady=10)  # Размещаем текстовое поле на окне
+    scrollbar = tk.Scrollbar(orient="vertical", command = t.yview) # Создаем вертикальный скроллбар , позволяющий прокручивать текстовое поле
+    t["yscrollcommand"]=scrollbar.set  # Привязываем скроллбар к текстовому полю
+    scrollbar.grid(row=3,column=0,columnspan=2,sticky='nse')  # Размещаем скроллбар на окне
+    t.yview_scroll(number=1, what="units")  # Вызываем прокрутку текстового поля
+    scrollbar.config(command=t.yview)  # Обновляем команду скроллбара
+    btn1 = tk.Button(font='9',text='Завершить программу', command= lambda: window.quit()) # Кнопка для завершения программы
+    contracts = load_data(t,'8.csv')  # Загружаем данные из файла
+    if contracts:  # Проверяем, были ли загружены контракты
+        lbl1.grid(row=0, column=0, padx=10, pady=10)  # Размещаем метку для врачей
+        lbl2.grid(row=0, column=1, padx=10, pady=10) # Размещаем метку для типов услуг
+        segmentation = segment_by_medicine_type(contracts) # Сегментируем контракты по типам услуг
+        visualize_medicine_type_pie_chart(window,segmentation)  # Визуализируем сегментацию
+        segmentation = segment_by_doctor(contracts)  # Сегментируем контракты по врачам
+        visualize_doctor_pie_chart(window,segmentation) # Визуализируем сегментацию
+    btn1.grid(row=4, column=0, columnspan=2,pady=20) # Размещаем кнопку завершения программы
+    window.mainloop() # Запускаем главный цикл обработки событий
+main() # Запускаем функцию main
